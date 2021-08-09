@@ -1,0 +1,30 @@
+[package]
+name = "iotics-identity"
+version = "0.1.0"
+authors = ["Mihai Dinculescu <mihai.dinculescu@iotic-labs.com>"]
+edition = "2018"
+
+[dependencies]
+hmac = "0.10.1"
+sha2 = "0.9.3"
+chrono = { version = "0.4.19", features=["serde"] }
+hex = "0.4.2"
+jwt-compact = { git = "https://github.com/slowli/jwt-compact.git", features=["es256k"] }
+serde = { version = "1.0.123", features=["derive"] }
+rand = "0.8.3"
+getrandom = { version = "0.2", features = ["js"] }
+rand_chacha = "0.3.0"
+thiserror = "1.0.23"
+regex = "1"
+serde_json = "1.0.62"
+bs58 = "0.4.0"
+base64 = "0.13.0"
+blake2 = "0.9.1"
+secp256k1 = { version = "0.20.1", features=["recovery"] }
+
+surf = { version = "2.2", default-features = false, optional = true }
+js-sys = { version = "0.3", optional = true }
+
+[features]
+default = ["surf/default"]
+wasm = ["js-sys", "surf/wasm-client"]
