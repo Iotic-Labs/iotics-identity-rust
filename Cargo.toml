@@ -5,22 +5,23 @@ authors = ["Mihai Dinculescu <mihai.dinculescu@iotic-labs.com>"]
 edition = "2018"
 
 [dependencies]
-hmac = "0.10.1"
-sha2 = "0.9.3"
-chrono = { version = "0.4.19", features=["serde"] }
-hex = "0.4.2"
+hmac = "0.10"
+sha2 = "0.9"
+chrono = { version = "0.4", features=["serde"] }
+hex = "0.4"
 jwt-compact = { git = "https://github.com/slowli/jwt-compact.git", features=["es256k"] }
-serde = { version = "1.0.123", features=["derive"] }
-rand = "0.8.3"
+serde = { version = "1.0", features=["derive"] }
+serde_json = "1.0"
+rand = "0.8"
 getrandom = { version = "0.2", features = ["js"] }
-rand_chacha = "0.3.0"
-thiserror = "1.0.23"
+rand_chacha = "0.3"
+thiserror = "1.0"
 regex = "1"
-serde_json = "1.0.62"
-bs58 = "0.4.0"
-base64 = "0.13.0"
-blake2 = "0.9.1"
-secp256k1 = { version = "0.20.1", features=["recovery"] }
+bs58 = "0.4"
+base64 = "0.13"
+blake2 = "0.9"
+secp256k1 = { version = "0.20", features=["recovery"] }
+bip39 = "1.0"
 
 surf = { version = "2.2", default-features = false, optional = true }
 js-sys = { version = "0.3", optional = true }

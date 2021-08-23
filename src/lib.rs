@@ -1,6 +1,6 @@
 use document::Delegation;
 use errors::SecurityError;
-use identifier::DIDType;
+use identifier::{DIDType, SeedType};
 use jwt_compact::{alg::Es256k, AlgorithmExt, Claims, Renamed};
 use secp256k1::{PublicKey, Secp256k1, SecretKey};
 use serde::{Deserialize, Serialize};
@@ -69,7 +69,7 @@ pub fn new_authentication_token(config: &Config) -> String {
 
 pub async fn new_twin_did(config: &Config, label: String) -> Result<String, SecurityError> {
     let seed = hex::encode(&label);
-    let master = identifier::seed_to_master(&seed);
+    let master = identifier::seed_to_master(&seed, SeedType::None);
     let twin_private_key_hex =
         identifier::new_private_hex_from_path_str(master, identifier::DIDType::twin, label);
     let twin_private_key_ecdsa = identifier::private_hex_to_ecdsa(twin_private_key_hex);
@@ -139,13 +139,28 @@ pub async fn new_twin_did(config: &Config, label: String) -> Result<String, Secu
 }
 
 fn build_keys(config: &Config) -> (SecretKey, PublicKey) {
-    let master = identifier::seed_to_master(&config.agent_secret);
+    // try out with seed = None
+    let master = identifier::seed_to_master(&config.agent_secret, SeedType::None);
 
     let private_key_hex =
         identifier::new_private_hex_from_path(master, identifier::DIDType::agent, 0);
 
-    let secret_key = identifier::private_hex_to_ecdsa(private_key_hex);
-    let public_key = identifier::private_ecdsa_to_public_ecdsa(&secret_key);
+    let mut private_ecdsa = identifier::private_hex_to_ecdsa(private_key_hex);
+    let mut public_ecdsa = identifier::private_ecdsa_to_public_ecdsa(&private_ecdsa);
 
-    (secret_key, public_key)
+    let public_bytes = identifier::public_ecdsa_to_bytes(&public_ecdsa);
+    let did_identifier = identifier::make_identifier(public_bytes);
+
+    if did_identifier != config.agent_did {
+        // seed = None doesn't match, try with Bip39
+        let master = identifier::seed_to_master(&config.agent_secret, SeedType::Bip39);
+
+        let private_key_hex =
+            identifier::new_private_hex_from_path(master, identifier::DIDType::agent, 0);
+
+        private_ecdsa = identifier::private_hex_to_ecdsa(private_key_hex);
+        public_ecdsa = identifier::private_ecdsa_to_public_ecdsa(&private_ecdsa);
+    }
+
+    (private_ecdsa, public_ecdsa)
 }

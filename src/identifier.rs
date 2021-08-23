@@ -1,5 +1,6 @@
 use std::fmt;
 
+use bip39::Mnemonic;
 use blake2::{
     digest::{Update, VariableOutput},
     VarBlake2b,
@@ -34,6 +35,11 @@ pub enum DIDType {
     twin,
 }
 
+pub enum SeedType {
+    None,
+    Bip39,
+}
+
 impl fmt::Display for DIDType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
@@ -51,13 +57,31 @@ pub fn new_master_seed() -> String {
     data_hex
 }
 
+/// seed_to_mnemonic: Take seed string hex and return mnemonic string
+pub fn seed_to_mnemonic(seed_hex: &String) -> String {
+    let bytes = hex::decode(seed_hex).unwrap();
+
+    let mnemonic = Mnemonic::from_entropy(&bytes).unwrap();
+    mnemonic.to_string()
+}
+
 /// seed_to_master: Takes seed hex and returns master bytes
-pub fn seed_to_master(seed_hex: &String) -> Vec<u8> {
-    let seed = hex::decode(seed_hex).unwrap();
-    let mac = HmacSha512::new_varkey(&seed).unwrap();
-    let result = mac.finalize();
-    let master = result.into_bytes().to_vec();
-    master
+pub fn seed_to_master(seed_hex: &String, method: SeedType) -> Vec<u8> {
+    match method {
+        SeedType::None => {
+            let seed = hex::decode(seed_hex).unwrap();
+            let mac = HmacSha512::new_varkey(&seed).unwrap();
+            let result = mac.finalize();
+            let master = result.into_bytes().to_vec();
+            master
+        }
+        SeedType::Bip39 => {
+            let mstr = seed_to_mnemonic(seed_hex);
+            let mnemonic = Mnemonic::parse_normalized(&mstr).unwrap();
+            let result = mnemonic.to_seed("").iter().cloned().collect();
+            result
+        }
+    }
 }
 
 /// new_private_hex_from_path: Takes master bytes, purpose and count and returns new private key str hex
