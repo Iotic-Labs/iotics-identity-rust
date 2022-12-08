@@ -20,7 +20,7 @@ regex = "1"
 bs58 = "0.4"
 base64 = "0.13"
 blake2 = "0.9"
-secp256k1 = { version = "0.20", features=["recovery"] }
+secp256k1 = { version = "0.22", features=["recovery"] }
 bip39 = "1.0"
 
 surf = { version = "2.2", default-features = false, optional = true }
